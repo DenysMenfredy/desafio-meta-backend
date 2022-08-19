@@ -1,3 +1,4 @@
+import pytest
 from src import __version__
 
 
