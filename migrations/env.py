@@ -5,9 +5,10 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from sqlmodel import SQLModel
-from src.models.card import Card
-from src.models.tag import Tag
+from sqlalchemy.ext.declarative import declarative_base
+from src.schemas.card import Card
+from src.schemas.tag import Tag
+from src.schemas.card_has_tag import CardHasTag
 from src.db.conn import connect_to_db
 
 
@@ -24,7 +25,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = SQLModel.metadata
+Base = declarative_base()
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

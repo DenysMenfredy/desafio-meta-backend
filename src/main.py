@@ -1,21 +1,25 @@
-from typing import Union
 from fastapi import FastAPI
-from sqlmodel import SQLModel
 from .db.conn import connect_to_db
 from .routers import card, tag
-from .models.card import Card
-from .models.tag import Tag
-from .models.card_has_tag import CardHasTag
-
+from .schemas.card import Card
+from .schemas.tag import Tag
+from .schemas.card_has_tag import CardHasTag
+from .db.tables import metadata_obj
+from sqlalchemy.ext.declarative import declarative_base
 
 engine = connect_to_db()
+if engine:
+    print('Connected to database')
 
-SQLModel.metadata.create_all(engine)
+Base = declarative_base()
+Base.metadata.create_all(bind=engine)
+metadata_obj.create_all(bind=engine)
+
 
 app = FastAPI()
 
 app.include_router(card.router)
-# app.include_router(tag.router)
+app.include_router(tag.router)
 
 @app.get("/", status_code=200)
 async def root():

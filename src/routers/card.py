@@ -1,11 +1,12 @@
 from ..db.conn import connect_to_db
-from ..models.card import Card
-from ..models.tag import Tag
-from ..models.card_has_tag import CardHasTag
-from sqlmodel import SQLModel, Session, select, insert, update, delete
+from ..schemas.card import Card, CardCreate, CardGet, CardUpdate
+from ..schemas.tag import Tag
+from ..schemas.card_has_tag import CardHasTag
 from typing import Optional, List
 from fastapi import APIRouter, Request, Response, Depends, HTTPException
 from datetime import datetime
+from sqlalchemy.orm import Session
+from ..db import models
 
 router = APIRouter()
 
@@ -13,54 +14,73 @@ engine = connect_to_db()
 
 # session = Session(engine)
 
-@router.post('/cards')
-def create_card(card: Card, tags:str):
-    tags = tags.split(',')
-    for tag in tags:
-        tag = Tag(name=tag)
-        card_has_tag = CardHasTag(card_id=card.id, tag_id=tags.id)
+@router.get("/cards", status_code=200, response_model=List[CardGet])
+async def get_cards():
     with Session(engine) as session:
-        session.add(card.card)
-        session.add(card.tags)
-        session.add(card_has_tag)
+        cards = session.query(models.Card).all()
+        return cards
+
+@router.get("/cards/{id}", status_code=200, tags=["cards"])
+async def get_card(id: int):
+    with Session(engine) as session:
+        card = session.query(models.Card).filter(models.Card.id == id).first()
+        if not card:
+            raise HTTPException(status_code=404, detail="Card not found")
+        return card
+
+@router.post("/cards", status_code=201, tags=["cards"])
+async def create_card(card_info: CardCreate):
+    card_db = models.Card(texto=card_info.texto)
+    with Session(engine) as session:
+        db_tags = session.query(models.Tag).all()
+        for tag in card_info.tags:
+            if tag.name not in [tag.name for tag in db_tags]:
+                db_tag = models.Tag(name=tag.name)
+                session.add(db_tag)
+                card_db.tags.append(db_tag)
+            else:
+                tag_db = session.query(models.Tag).filter(models.Tag.name == tag.name).first()
+                card_db.tags.append(tag_db)
+        session.add(card_db)
         session.commit()
-
-    return Response(status_code=201, 
-                    content={
-                        'message': 'Card created',
-                        'card': card,
-                        'tags': tags
-                    })
-
-@router.get('/cards/{id}')
-def get_card(id: int) -> Card:
-    with Session(engine) as session:
-        statement = select(Card).where(Card.id == id)
-        results = session.exec(statement)
-        if results.first() is None:
-            return None
-        else:
-            return results.first()
-
-
-@router.get('/cards')
-def get_cards() -> List[Card]:
-    with Session(engine) as session:
-        statement = select(Card)
-        results = session.exec(statement)
-        print(results)
-        return results.fetchall()
-
-@router.delete('/cards/{id}')
-def delete_card(id: int) -> Card:
-    return Card.delete(id=id)
-
-@router.put('/cards/{id}')
-def update_card(id: int, texto: str, data_criacao: str, data_modificacao: str) -> Card:
-    return Card.update(id=id, texto=texto, data_criacao=data_criacao, data_modificacao=data_modificacao)
-
-# @router.get('/cards', response_model=List[Card])
-# def get_card_by_tag(tag: str) -> List[Card]:
-#     return Card.get_by_tag(tag=tag)
-
+        session.refresh(card_db)
+        
+        return {
+            'message': 'Card created successfully',
+            'card': card_db,
+            # 'tags': card_db.tags
+        }
     
+@router.put("/cards/{id}", status_code=200, tags=["cards"])
+async def update_card(card_id: int, card: CardUpdate):
+    with Session(engine) as session:
+        card_db = session.query(models.Card).filter(models.Card.id == card_id).first()
+        if not card_db:
+            raise HTTPException(status_code=404, detail="Card not found")
+        card_db.texto = card.texto
+        card_db.tags = []
+        db_tags = session.query(models.Tag).all()
+        for tag in card.tags:
+            if tag.name not in [tag.name for tag in db_tags]:
+                db_tag = models.Tag(name=tag.name)
+                session.add(db_tag)
+                card_db.tags.append(db_tag)
+            else:
+                tag_db = session.query(models.Tag).filter(models.Tag.name == tag.name).first()
+                card_db.tags.append(tag_db)
+        session.commit()
+        session.refresh(card_db)
+        # card_db.data_modificacao = datetime.utcnow()
+        return card
+    
+@router.delete("/cards/{id}", status_code=200, tags=["cards"])
+async def delete_card(card_id: int):
+    with Session(engine) as session:
+        card_db = session.query(models.Card).filter(models.Card.id == card_id).first()
+        if not card_db:
+            raise HTTPException(status_code=404, detail="Card not found")
+        session.delete(card_db)
+        session.commit()
+        return {
+            'message': 'Card deleted successfully'
+        }

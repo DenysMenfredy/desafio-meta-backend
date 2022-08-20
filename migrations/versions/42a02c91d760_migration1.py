@@ -1,18 +1,17 @@
-"""adding default field
+"""migration1
 
-Revision ID: 85cfd11fb9b8
-Revises: df8d660ee5b9
-Create Date: 2022-08-19 11:27:41.078801
+Revision ID: 42a02c91d760
+Revises: 
+Create Date: 2022-08-19 21:49:14.524238
 
 """
 from alembic import op
 import sqlalchemy as sa
-import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision = '85cfd11fb9b8'
-down_revision = 'df8d660ee5b9'
+revision = '42a02c91d760'
+down_revision = None
 branch_labels = None
 depends_on = None
 

@@ -1,4 +1,4 @@
-from sqlmodel import create_engine
+from sqlalchemy import create_engine
 from dotenv import load_dotenv, dotenv_values
 import os
 
