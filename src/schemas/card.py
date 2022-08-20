@@ -9,6 +9,7 @@ class Card(BaseModel):
     texto : str
     data_criacao : Optional[datetime] = datetime.utcnow()
     data_modificacao : Optional[datetime] = datetime.utcnow()
+    tags : List[Tag] = []
     
     def __str__(self):
         return f'<Card(id={self.id}, texto={self.texto}, data_criacao={self.data_criacao}, data_modificacao={self.data_modificacao})>'
