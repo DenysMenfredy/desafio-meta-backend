@@ -7,16 +7,16 @@ git clone https://github.com/DenysMenfredy/desafio-meta-backend
 ```
 2. Entre no diretório do desafio:
     ```bash
-    cd desafio-meta-backend
+cd desafio-meta-backend
     ```
 3. Utilize o docker para executar o desafio:
     3.1. Faça o build primeiro:
     ```bash
-        docker build -t desafio-meta-backend .
+    docker build -t desafio-meta-backend .
     ```
     3.2. Execute o desafio:
     ```bash
-        docker run -p 8000:8000 desafio-meta-backend
+    docker run -p 8000:8000 desafio-meta-backend
     ```
 4. Acesse o desafio no endereço:
     ```bash
