@@ -25,3 +25,9 @@ def connect_to_test_db():
     database = config['DB_NAME']
     conn_url = 'mysql+pymysql://{user}:{password}@{host}:{port}/{database}'
     return create_engine(conn_url.format(user=user, password=password, host=host, port=port, database=database))
+
+
+def connect_to_sqlite_db():
+    database = 'database.db'
+    conn_url = 'sqlite:///{database}'
+    return create_engine(conn_url.format(database=database))

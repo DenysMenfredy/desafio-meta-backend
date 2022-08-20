@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, MetaData, Table, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime
 
 metadata_obj = MetaData()

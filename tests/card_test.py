@@ -2,8 +2,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from src.main import app
-from src.db.conn import connect_to_db
-from src.schemas.card import Card, CardCreate, CardGet, CardUpdate
+
 
 client = TestClient(app)
 

@@ -11,10 +11,6 @@ COPY poetry.lock pyproject.toml /src/
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction
 
-# COPY alembic.ini /src/
-# RUN alembic init migrations
-# RUN alembic upgrade head
-
 COPY . /src/
 
 EXPOSE 8000

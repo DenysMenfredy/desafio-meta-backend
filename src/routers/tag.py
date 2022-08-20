@@ -1,74 +1,62 @@
-from ..db.conn import connect_to_db
+from typing import Optional, List
+from fastapi import APIRouter, HTTPException
+from sqlalchemy.orm import Session
 from ..schemas.card import Card, CardCreate, CardGet, CardUpdate
 from ..schemas.tag import Tag, TagCreate, TagUpdate
 from ..schemas.card_has_tag import CardHasTag
-from typing import Optional, List
-from fastapi import APIRouter, Request, Response, Depends, HTTPException
-from datetime import datetime
-from sqlalchemy.orm import Session
-from ..db import models
+from ..db.crud import DBCrud
 
 router = APIRouter()
 
-engine = connect_to_db()
+crud = DBCrud()
 
 @router.get("/tags", status_code=200, response_model=List[Tag])
 async def get_tags():
-    with Session(engine) as session:
-        tags = session.query(models.Tag).all()
-        return tags
+    tags = crud.get_tags()
+
+    return tags
 
 @router.get("/tags/{id}", status_code=200, tags=["tags"])
 async def get_tag(id: int):
-    with Session(engine) as session:
-        tag = session.query(models.Tag).filter(models.Tag.id == id).first()
-        if not tag:
-            raise HTTPException(status_code=404, detail="Tag not found")
-        return tag
+    tag = crud.get_tag(id)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    return tag
 
 @router.post("/tags", status_code=201, tags=["tags"])
 async def create_tag(tag_info: TagCreate):
-    tag_db = models.Tag(name=tag_info.name)
-    with Session(engine) as session:
-        session.add(tag_db)
-        session.commit()
-        session.refresh(tag_db)
+    try:
+        tag = crud.create_tag(tag_info)
         return {
-            'message': 'Tag created successfully',
-            'tag': tag_db
+            'message': 'Tag criada com sucesso',
+            'tag': tag
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e)
 
 @router.put("/tags/{id}", status_code=200, tags=["tags"])
-async def update_tag(tag_id: int, tag: TagUpdate):
-    with Session(engine) as session:
-        tag_db = session.query(models.Tag).filter(models.Tag.id == tag_id).first()
-        if not tag_db:
-            raise HTTPException(status_code=404, detail="Tag not found")
-        tag_db.name = tag.name
-        session.commit()
-        session.refresh(tag_db)
-        return {
-            'message': 'Tag updated successfully',
-            'tag': tag_db
-        }
+async def update_tag(id: int, tag: TagUpdate):
+    tag_db = crud.update_tag(id, tag)
+    if not tag_db:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    return {
+        'message': 'Tag atualizada com sucesso',
+        'tag': tag_db
+    }
 
 @router.delete("/tags/{id}", status_code=200, tags=["tags"])
-async def delete_tag(tag_id: int):
-    with Session(engine) as session:
-        tag_db = session.query(models.Tag).filter(models.Tag.id == tag_id).first()
-        if not tag_db:
-            raise HTTPException(status_code=404, detail="Tag not found")
-        session.delete(tag_db)
-        session.commit()
+async def delete_tag(id: int):
+    try:
+        crud.delete_tag(id)
         return {
-            'message': 'Tag deleted successfully'
+            'message': 'Tag deletada com sucesso'
         }
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Tag not found")
 
 @router.get("/tags/{name}/cards", response_model=List[Card], status_code=200, tags=["tags"])
 async def get_tag_cards(name: str):
-    with Session(engine) as session:
-        tag = session.query(models.Tag).filter(models.Tag.name == name).first()
-        if not tag:
-            raise HTTPException(status_code=404, detail="Tag not found")
-        cards = tag.cards
-        return cards
+    cards = crud.get_cards_by_tag(name)
+    if not cards:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    return cards

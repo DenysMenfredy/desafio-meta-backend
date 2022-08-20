@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from src.schemas.card import Card
 from src.schemas.tag import Tag
 from src.schemas.card_has_tag import CardHasTag
-from src.db.conn import connect_to_db
+from src.db.conn import connect_to_db, connect_to_sqlite_db
 
 
 # this is the Alembic Config object, which provides
@@ -70,7 +70,8 @@ def run_migrations_online() -> None:
     #     prefix="sqlalchemy.",
     #     poolclass=pool.NullPool,
     # )
-    connectable = connect_to_db()
+    # connectable = connect_to_db() #connect to mysql
+    connectable = connect_to_sqlite_db() #connect to sqlite
 
     with connectable.connect() as connection:
         context.configure(
