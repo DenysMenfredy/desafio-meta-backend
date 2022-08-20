@@ -14,17 +14,17 @@ engine = connect_to_db()
 
 # session = Session(engine)
 
-@router.get("/cards", status_code=200, response_model=List[CardGet])
+@router.get("/cards", status_code=200, response_model=List[Card])
 async def get_cards():
     with Session(engine, expire_on_commit=False) as session:
         cards = session.query(models.Card).all()
         if not cards:
             return []
-        for card in cards:
-            card.tags = session.query(models.Tag)\
-                .join(models.CardHasTag)\
-                .join(models.Card)\
-                .filter(models.Card.id == card.id)\
+        # for card in cards:
+        #     card.tags = session.query(models.Tag)\
+        #         .join(models.CardHasTag)\
+        #         .join(models.Card)\
+        #         .filter(models.Card.id == card.id)\
 
         return cards
 
