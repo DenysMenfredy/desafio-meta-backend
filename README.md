@@ -11,13 +11,13 @@ Os detalhes da solução estão disponíveis no [neste](descricao_solucao.pdf) a
     ```
 3. Utilize o docker para executar o desafio:
     3.1. Faça o build primeiro:
-        ```bash
+    ```bash
         docker build -t desafio-meta-backend .
-        ```
+    ```
     3.2. Execute o desafio:
-        ```bash
-            docker run -p 8000:8000 desafio-meta-backend
-        ```
+    ```bash
+        docker run -p 8000:8000 desafio-meta-backend
+    ```
 4. Acesse o desafio no endereço:
 ```bash
     http://localhost:8000
