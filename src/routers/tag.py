@@ -25,6 +25,8 @@ async def get_tag(id: int):
 
 @router.post("/tags", status_code=201, tags=["tags"])
 async def create_tag(tag_info: TagCreate):
+    if tag_info.name in [tag.name for tag in crud.get_tags()]:
+        raise HTTPException(status_code=400, detail="Tag name already exists")
     try:
         tag = crud.create_tag(tag_info)
         return {
