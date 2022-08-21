@@ -28,6 +28,7 @@ def connect_to_test_db():
 
 
 def connect_to_sqlite_db():
+    """This method connects to a sqlite database"""
     database = 'database.db'
     conn_url = 'sqlite:///{database}'
     return create_engine(conn_url.format(database=database))
